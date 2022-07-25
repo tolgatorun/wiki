@@ -1,0 +1,6 @@
+<h1>Editing {{.Title}}</h1>
+
+<form action="/save/{{.Title}}" method="POST">  <!--template directives are enclosed in double curly braces -->        
+<div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div> <!-- printf %s .Body instruction is a function call that outputs .Body as a string instead of stream of bytes-->
+<div><input type="submit" value="Save"></div> <!-- same as call to fmt.Printf-->
+</form>

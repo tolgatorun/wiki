@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -28,10 +28,15 @@ func loadPage(title string) (*Page, error) { //loadPage constructs file name fro
 	return &Page{Title: title, Body: body}, nil
 }
 
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, _ := template.ParseFiles(tmpl + ".html") //ParseFiles will read edit.html and return a *template.Template
+	t.Execute(w, p)                             //t.Execute will execute template writes generated HTML to http.ResponseWriter
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):] //extracting title from r.URL.Path(path component of requested URL), dropping "/view/" from start
 	p, _ := loadPage(title)             //ignoring error value
-	fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body)
+	renderTemplate(w, "view", p)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) { //loads page,if it doesn't exist create an empty Page struct and displays an HTML form
@@ -40,12 +45,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) { //loads page,if it do
 	if err != nil {                     //if there is error for example requested page doesn't exist
 		p = &Page{Title: title} //creating a empty struct literal
 	}
-	fmt.Fprintf(w, "<h1>Editing %s</h1>"+
-		"<form action=\"/save/%s\" method=\"POST\">"+
-		"<textarea name=\"body\">%s</textarea><br>"+
-		"<input type=\"submit\" value=\"Save\">"+
-		"</form>",
-		p.Title, p.Title, p.Body)
+	renderTemplate(w, "edit", p)
 }
 
 func main() {
